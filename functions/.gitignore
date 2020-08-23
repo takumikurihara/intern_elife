@@ -1,0 +1,11 @@
+node_modules/
+*.ps1
+*.cmd
+compileProtos
+gcs-upload
+gp12-pem
+mime
+pbjs
+pbts
+semver
+uuid

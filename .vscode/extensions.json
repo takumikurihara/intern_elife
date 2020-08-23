@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "octref.vetur",
+    "ms-ceintl.vscode-language-pack-ja",
+    "spywhere.guides"
+  ]
+}

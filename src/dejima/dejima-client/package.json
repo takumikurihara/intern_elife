@@ -1,0 +1,46 @@
+{
+  "name": "es_api",
+  "version": "6.1.3",
+  "description": "__API_OneAPI1_2___HTTP_2__HTTP_1_1_TLSHTTPS___No________________________________________________________1___Accept___application_json____2___X_Api_Key_____Acceptapplication_json__JSON_JSONUTF_8_JSONJSON_OpenAPI_Specification__Version_3_0_2__DataTypes___DataTypes_https__github_com_OAI_OpenAPI_Specification_blob_master_versions_3_0_2_mddata_types__No__________________________1___string___JSON____2___int___JSON____3___float___JSON____4___bool___JSON____5___datetime___ISO8611YYYY_MM_DDTHHMMSS_br__2015_08_26T191603__2015826191603____6___date___ISO8611YYYY_MM_DD_br__2015_08_26__2015826____7___datejun______datejunYYYYMMJDD_YYYY__MM_011200_J_123_0_DD_013100110111202213______201900000__2019_____201901000__20191_____201903100__20193_____201912300__201912_____201906105__201965_____201908216__2019816__OR__array__OR_ex_layout_type_code1layout_type_code2__order_ascdescex_price_orderdesc",
+  "license": "Unlicense",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "babel src -d dist",
+    "prepack": "npm run build",
+    "test": "mocha --require @babel/register --recursive"
+  },
+  "browser": {
+    "fs": false
+  },
+  "dependencies": {
+    "@babel/cli": "^7.0.0",
+    "superagent": "3.7.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/plugin-proposal-decorators": "^7.0.0",
+    "@babel/plugin-proposal-do-expressions": "^7.0.0",
+    "@babel/plugin-proposal-export-default-from": "^7.0.0",
+    "@babel/plugin-proposal-export-namespace-from": "^7.0.0",
+    "@babel/plugin-proposal-function-bind": "^7.0.0",
+    "@babel/plugin-proposal-function-sent": "^7.0.0",
+    "@babel/plugin-proposal-json-strings": "^7.0.0",
+    "@babel/plugin-proposal-logical-assignment-operators": "^7.0.0",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.0.0",
+    "@babel/plugin-proposal-numeric-separator": "^7.0.0",
+    "@babel/plugin-proposal-optional-chaining": "^7.0.0",
+    "@babel/plugin-proposal-pipeline-operator": "^7.0.0",
+    "@babel/plugin-proposal-throw-expressions": "^7.0.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@babel/plugin-syntax-import-meta": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/register": "^7.0.0",
+    "expect.js": "^0.3.1",
+    "mocha": "^5.2.0",
+    "sinon": "^7.2.0"
+  },
+  "files": [
+    "dist"
+  ]
+}

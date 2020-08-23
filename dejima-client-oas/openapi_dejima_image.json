@@ -1,0 +1,719 @@
+{
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "properties": {
+          "detail": {
+            "description": "可読なエラーメッセージ",
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "MetadataResponse": {
+        "properties": {
+          "category": {
+            "description": "画像カテゴリー\n\n賃貸物件と売買物件で異なる。",
+            "example": "間取り",
+            "title": "Category",
+            "type": "string"
+          },
+          "comment": {
+            "description": "画像コメント",
+            "title": "Comment",
+            "type": "string"
+          },
+          "description": {
+            "description": "画像説明",
+            "title": "Description",
+            "type": "string"
+          },
+          "hash_type": {
+            "description": "画像データのハッシュを計算するハッシュ関数名\n\n通常はCRC32",
+            "example": "CRC32",
+            "title": "Hash Type",
+            "type": "string"
+          },
+          "hash_value": {
+            "description": "画像データのハッシュ値",
+            "example": "-520273788",
+            "title": "Hash Value",
+            "type": "string"
+          },
+          "height": {
+            "description": "画像高さのピクセル数",
+            "example": 320,
+            "title": "Height",
+            "type": "integer"
+          },
+          "kind": {
+            "description": "画像種別\n\n物件内でユニーク。rentとsaleで共通",
+            "example": "建物パノラマ画像1",
+            "title": "Kind",
+            "type": "string"
+          },
+          "kind_code": {
+            "description": "画像種別コード\n\n物件内でユニーク。rentとsaleで共通",
+            "example": "p1",
+            "title": "Kind Code",
+            "type": "string"
+          },
+          "modified": {
+            "description": "画像の最終更新日時\n\nRFC1123形式",
+            "example": "Thu, 21 Sep 2017 14:45:50 +0900",
+            "title": "Modified",
+            "type": "string"
+          },
+          "property_key": {
+            "description": "いい生活番号\n\nスマートOneコンバートでは物件識別コード(PROPERTY_KEY_TEXT)と呼ばれている",
+            "example": "1113026781900000000002",
+            "title": "Property Key",
+            "type": "string"
+          },
+          "url": {
+            "description": "画像URL\n\nこのURLを利用して画像データを取得する。",
+            "example": "https://example.es-e-bukken.jp/image/p1.jpg?iid=123",
+            "format": "uri",
+            "maxLength": 65536,
+            "minLength": 1,
+            "title": "Url",
+            "type": "string"
+          },
+          "width": {
+            "description": "画像横幅のピクセル数",
+            "example": 480,
+            "title": "Width",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "property_key",
+          "url",
+          "kind",
+          "kind_code",
+          "hash_type",
+          "hash_value",
+          "width",
+          "height",
+          "modified"
+        ],
+        "title": "MetadataResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "<!--\nこの文書はOpenAPIの description に埋め込まれて利用されることが想定されている。\n-->\n\n## 想定利用ケースとAPIが提供する機能\n\n物件を広告するホームページやスマホアプリでの利用を想定した機能を提供する。\n具体例として以下のような利用を想定している。\n\n* 物件詳細画面のように単一の物件に関連する画像をまとめて取得する場合\n* 物件一覧画面のように多数の物件の一部の画像(外観写真や間取り図)のサムネイルを取得する場合\n\nこれらに対応して以下の３つの機能を実装している。\n\n* 物件を指定して、その物件に関連する画像メタデータを取得する\n* 複数の物件を指定して、関連するすべての画像メタデータをまとめて取得する\n* 画像ファイルを（必要ならば）縮小して取得する\n\n## リソース補足\n\n### 画像種別（kind）について\n\n画像を特定するための情報。\n1つの物件に紐づく画像の中では画像種別はユニークになっており、\nいい物件Oneで画像を登録したときの「登録位置」に応じて決まる。\n\n賃貸物件（rent）と売買物件（sale）で共通の画像種別が用いられる。\nただし、どちらかにしか用いられない画像種別も存在する。\n\n具体的な画像種別と対応するコード値は以下の表の通りである。\n連番の部分については「〜」で省略されている。\n\n| kind | kind_code | rent | sale |\n| :--- | :-------- | :--- | :--- |\n| 間取り | 1 | ○ | |\n| 玄関 | 2 | ○ | |\n| リビング | 3 | ○ | |\n| キッチン | 4 | ○ | |\n| ベッドルーム | 5 | ○ | |\n| ベッドルーム | 6 | ○ | |\n| ベランダ | 7 | ○ | |\n| レインズ用チラシ画像 | 8 | ○ | ○ |\n| チラシ | 9 | ○ | ○ |\n| 外観 | 10 | ○ | ○ |\n| 地図 | 11 | ○ | |\n| ランドマーク | 12 | ○ | |\n| その他内観画像1～6 | 13〜18 | ○ | |\n| その他外観画像1～6 | 19〜24 | ○ | |\n| その他内観画像7～42 | 25〜60 | ○ | |\n| 建物パノラマ画像1～5 | p1〜p5 | ○ | ○ |\n| 区画パノラマ画像1～5 | p6〜p10 | ○ | ○ |\n| 周辺施設画像1～ | i1〜 | ○ | ○ |\n| 売主コメント1～ | u1〜 | | ○ |\n| 構造・設備1～ | k1〜 | | ○ |\n| その他画像 | 99 | | ○ |\n\n### 画像カテゴリー（category）について\n\n補助的な画像についての情報。\n賃貸物件、売買物件、周辺施設画像の計３グループが存在する。\n画像カテゴリーがnullのこともある。\n\n#### 賃貸物件（rent）の category 一覧\n\n```text\n間取り、玄関、リビング、キッチン、ベッドルーム、風呂画像、ベランダ、レインズ用チラシ画像、チラシ、外観、地図、その他、エントランス、ロビー、駐車場、その他共有部分、その他部屋・スペース、トイレ、洗面所、収納、庭、セキュリティ、その他設備、眺望、内装、子供部屋、地図（共通）、ダイニング、洋室、和室、ロフト、屋上、倉庫、周辺環境\n```\n\n#### 売買物件（sale）の category 一覧\n\n```text\n間取図・土地図、現地写真、内観写真（その他）、同仕様写真（外観）、同仕様写真（その他内観）、完成予想図（外観）、完成予想図（内観）、眺望写真、造成完了予想図、建物プラン例（その他）、共用部写真（その他）、現地写真（庭）、現地写真（玄関）、現地写真（バルコニー）、現地写真（駐車場）、現地写真（前面道路含む現地写真）、現地写真（その他）、モデルルーム写真、モデルハウス写真、展示場／ショウルーム、内観写真（リビング）、内観写真（浴室）、内観写真（キッチン）、内観写真（リビング以外の居室）、内観写真（トイレ）、内観写真（洗面台・洗面所）、内観写真（収納）、共用部写真（エントランス）、共用部写真（ロビー）、共用部写真（駐車場）、区画図、土地図＋建物プラン例、分譲済街並み写真、航空写真、高台写真、同仕様写真（リビング）、同仕様写真（浴室）、同仕様写真（キッチン）、街並完成予想図、建物プラン例（外観写真）、建物プラン例（内観写真）、建物プラン例（パース・外観）、建物プラン例（パース・内観）、建物プラン例（間取り図）、その他、全体区画図、現地案内図、交通アクセス図、路線図、内観写真（内装）、内観写真（子供部屋）、内観写真（寝室）、設備、発電・温水設備、冷暖房・空調設備、防犯設備、その他設備、構造・工法・仕様、駅、公園、高校・高専、中学校、小学校、幼稚園・保育園、スーパー、周辺の街並み、ショッピングセンター、コンビニ、ドラッグストア、ホームセンター、病院、郵便局、役所、図書館、銀行、警察署・交番、その他環境写真、ベッドルーム、ダイニング、洋室、和室、ロフト、屋上、倉庫\n```\n\n#### 画像種別（kind）が周辺施設画像のときの category 一覧\n\n```text\n総合病院、内科、小児科、小学校、中学校、幼稚園、保育所、公園、スーパー、コンビ二、ショッピング施設、公共施設、海または川、高速道路入り口、コインランドリー、ランドマーク、郵便局、銀行、レストラン、その他、ドラッグストア、ホームセンター、高校・高専、役所、図書館、警察署・交番、駅、周辺の街並み、商店街、歯科、大学・短大、専門学校、インターチェンジ\n```\n\n###  媒体コード（baitai_code）について\n\n「媒体」とはいい物件Oneからデータを出向する先のサービスの総称である。\n具体的にはSUUMO賃貸やレインズ売買、貴社HP等を指す。\n\nいい物件Oneでは、媒体毎に画像を出稿する/しないを制限することができる。\n\n画像を登録した直後は全媒体に出稿する状態になっている。\nその状態から、画像毎に出稿禁止の設定ができる。\nパノラマ画像を登録した直後は出稿しない媒体も存在するような設定になっている。\n\nいい物件Oneで画像出稿禁止に設定されていた場合、画像メタデータ取得時にサーバでフィルターされることがある。\n具体的に指定するコード値については別途補足資料参照。\n\n## コンテンツの更新タイミング\n\n当APIではコンテンツキャッシュ（CDN）を利用している。\n\nいい物件Oneで募集画像を更新してから当APIのレスポンスに反映されるまでにはタイムラグが存在し、\n画像メタデータの取得は最大10分程度、画像データの取得は長期にわたって更新されないことがある。\n\n画像メタデータに含まれる画像URL（ `url` ）は画像の更新に追従して URL を更新する仕組みがある。\n画像URLを直接埋め込むのではなく、\n画像メタデータを取得してから画像URLを動的に埋め込むことでキャシュを回避する使い方が想定されている。\n\n## オリジン間リソース共有 (CORS)\n\n* ブラウザ上で稼働する JavaScript から呼び出し可能で、SPAでも利用可能\n* preflight 用に OPTIONS を許可\n* 基本的に `Access-Control-Allow-Origin: *` で応答するため、どのドメインからでも利用可能\n",
+    "title": "物件画像API",
+    "version": "2.1.0"
+  },
+  "openapi": "3.0.2",
+  "paths": {
+    "/rent/img/{property_key}/{filename}": {
+      "get": {
+        "description": "賃貸物件の画像データを取得する\n\nURL構成は変わる可能性がある。\n必ず画像メタデータに含まれる `url` を使って画像を取得するべき。",
+        "operationId": "get_image_rent_rent_img__property_key___filename__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "property_key",
+            "required": true,
+            "schema": {
+              "title": "Property Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "filename",
+            "required": true,
+            "schema": {
+              "title": "Filename",
+              "type": "string"
+            }
+          },
+          {
+            "description": "画像サイズ\n\n横×縦をpixel単位で指定する。\n正規表現では \\d+x\\d+ にマッチする。",
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "description": "画像サイズ\n\n横×縦をpixel単位で指定する。\n正規表現では \\d+x\\d+ にマッチする。",
+              "example": "60x40",
+              "pattern": "^\\d+x\\d+$",
+              "title": "Size",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Image Rent",
+        "tags": [
+          "ImageQueryAPI"
+        ]
+      }
+    },
+    "/rent/list/": {
+      "get": {
+        "description": "賃貸物件の画像メタデータをバルクで取得する",
+        "operationId": "bulk_get_metadata_rent_rent_list__get",
+        "parameters": [
+          {
+            "description": "いい生活番号のリスト（カンマ区切り）\n\nいい生活番号をカンマ区切りで複数指定できる。\n指定できるの個数の上限は50。\n",
+            "in": "query",
+            "name": "property_key",
+            "required": true,
+            "schema": {
+              "description": "いい生活番号のリスト（カンマ区切り）\n\nいい生活番号をカンマ区切りで複数指定できる。\n指定できるの個数の上限は50。\n",
+              "example": "2113026781900000000002,2113026781900000000003,2113026781900000000004",
+              "title": "Property Key",
+              "type": "string"
+            }
+          },
+          {
+            "description": "媒体コード\n\nいい物件One上の出稿設定でフィルターする\n\n* 専用の媒体コードを指定する。コードの詳細は「媒体コード（baitai_code）について」参照\n* 指定しなかった場合、いい物件Oneで画像の出稿先媒体を「すべて」にしている画像メタデータのみ取得する\n* 特にパノラマ画像はデフォルトでの出稿先媒体が「すべて」ではないので注意\n* いい物件Oneで出稿先媒体を限定している場合、このパラメータで媒体を指定する必要がある\n* 存在しないコードが指定されてもエラーにはせず、指定されなかったときと同じ挙動になる\n",
+            "in": "query",
+            "name": "baitai_code",
+            "required": false,
+            "schema": {
+              "description": "媒体コード\n\nいい物件One上の出稿設定でフィルターする\n\n* 専用の媒体コードを指定する。コードの詳細は「媒体コード（baitai_code）について」参照\n* 指定しなかった場合、いい物件Oneで画像の出稿先媒体を「すべて」にしている画像メタデータのみ取得する\n* 特にパノラマ画像はデフォルトでの出稿先媒体が「すべて」ではないので注意\n* いい物件Oneで出稿先媒体を限定している場合、このパラメータで媒体を指定する必要がある\n* 存在しないコードが指定されてもエラーにはせず、指定されなかったときと同じ挙動になる\n",
+              "example": "101",
+              "title": "Baitai Code",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "画像種別コード\n\n画像種別でフィルターする\n\n* kind_code をカンマ区切りで１つ以上指定することができる\n* 指定された場合、指定された画像種別のみを取得する\n* 指定されなかった場合、すべての画像を取得する\n* 存在しないコードが指定されてもエラーにならない\n",
+            "in": "query",
+            "name": "kind_code",
+            "required": false,
+            "schema": {
+              "description": "画像種別コード\n\n画像種別でフィルターする\n\n* kind_code をカンマ区切りで１つ以上指定することができる\n* 指定された場合、指定された画像種別のみを取得する\n* 指定されなかった場合、すべての画像を取得する\n* 存在しないコードが指定されてもエラーにならない\n",
+              "example": "1,2,3",
+              "title": "Kind Code",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MetadataResponse"
+                  },
+                  "title": "Response Bulk Get Metadata Rent Rent List  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "property_keyが50個を超えている場合等"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Bulk Get Metadata Rent",
+        "tags": [
+          "ImageQueryAPI"
+        ]
+      }
+    },
+    "/rent/{property_key}/": {
+      "get": {
+        "description": "賃貸物件の画像メタデータを取得する",
+        "operationId": "get_metadata_rent_rent__property_key___get",
+        "parameters": [
+          {
+            "description": "いい生活番号",
+            "in": "path",
+            "name": "property_key",
+            "required": true,
+            "schema": {
+              "description": "いい生活番号",
+              "example": "1113026781900000000002",
+              "title": "Property Key",
+              "type": "string"
+            }
+          },
+          {
+            "description": "媒体コード\n\nいい物件One上の出稿設定でフィルターする\n\n* 専用の媒体コードを指定する。コードの詳細は「媒体コード（baitai_code）について」参照\n* 指定しなかった場合、いい物件Oneで画像の出稿先媒体を「すべて」にしている画像メタデータのみ取得する\n* 特にパノラマ画像はデフォルトでの出稿先媒体が「すべて」ではないので注意\n* いい物件Oneで出稿先媒体を限定している場合、このパラメータで媒体を指定する必要がある\n* 存在しないコードが指定されてもエラーにはせず、指定されなかったときと同じ挙動になる\n",
+            "in": "query",
+            "name": "baitai_code",
+            "required": false,
+            "schema": {
+              "description": "媒体コード\n\nいい物件One上の出稿設定でフィルターする\n\n* 専用の媒体コードを指定する。コードの詳細は「媒体コード（baitai_code）について」参照\n* 指定しなかった場合、いい物件Oneで画像の出稿先媒体を「すべて」にしている画像メタデータのみ取得する\n* 特にパノラマ画像はデフォルトでの出稿先媒体が「すべて」ではないので注意\n* いい物件Oneで出稿先媒体を限定している場合、このパラメータで媒体を指定する必要がある\n* 存在しないコードが指定されてもエラーにはせず、指定されなかったときと同じ挙動になる\n",
+              "example": "101",
+              "title": "Baitai Code",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "画像種別コード\n\n画像種別でフィルターする\n\n* kind_code をカンマ区切りで１つ以上指定することができる\n* 指定された場合、指定された画像種別のみを取得する\n* 指定されなかった場合、すべての画像を取得する\n* 存在しないコードが指定されてもエラーにならない\n",
+            "in": "query",
+            "name": "kind_code",
+            "required": false,
+            "schema": {
+              "description": "画像種別コード\n\n画像種別でフィルターする\n\n* kind_code をカンマ区切りで１つ以上指定することができる\n* 指定された場合、指定された画像種別のみを取得する\n* 指定されなかった場合、すべての画像を取得する\n* 存在しないコードが指定されてもエラーにならない\n",
+              "example": "1,2,3",
+              "title": "Kind Code",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MetadataResponse"
+                  },
+                  "title": "Response Get Metadata Rent Rent  Property Key   Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Metadata Rent",
+        "tags": [
+          "ImageQueryAPI"
+        ]
+      }
+    },
+    "/sale/img/{property_key}/{filename}": {
+      "get": {
+        "description": "売買物件の画像データを取得する\n\nURL構成は変わる可能性がある。\n必ず画像メタデータに含まれる `url` を使って画像を取得するべき。",
+        "operationId": "get_image_sale_sale_img__property_key___filename__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "property_key",
+            "required": true,
+            "schema": {
+              "title": "Property Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "filename",
+            "required": true,
+            "schema": {
+              "title": "Filename",
+              "type": "string"
+            }
+          },
+          {
+            "description": "画像サイズ\n\n横×縦をpixel単位で指定する。\n正規表現では \\d+x\\d+ にマッチする。",
+            "in": "query",
+            "name": "size",
+            "required": false,
+            "schema": {
+              "description": "画像サイズ\n\n横×縦をpixel単位で指定する。\n正規表現では \\d+x\\d+ にマッチする。",
+              "example": "60x40",
+              "pattern": "^\\d+x\\d+$",
+              "title": "Size",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Image Sale",
+        "tags": [
+          "ImageQueryAPI"
+        ]
+      }
+    },
+    "/sale/list/": {
+      "get": {
+        "description": "売買物件の画像メタデータをバルクで取得する",
+        "operationId": "bulk_get_metadata_sale_sale_list__get",
+        "parameters": [
+          {
+            "description": "いい生活番号のリスト（カンマ区切り）\n\nいい生活番号をカンマ区切りで複数指定できる。\n指定できるの個数の上限は50。\n",
+            "in": "query",
+            "name": "property_key",
+            "required": true,
+            "schema": {
+              "description": "いい生活番号のリスト（カンマ区切り）\n\nいい生活番号をカンマ区切りで複数指定できる。\n指定できるの個数の上限は50。\n",
+              "example": "2113026781900000000002,2113026781900000000003,2113026781900000000004",
+              "title": "Property Key",
+              "type": "string"
+            }
+          },
+          {
+            "description": "媒体コード\n\nいい物件One上の出稿設定でフィルターする\n\n* 専用の媒体コードを指定する。コードの詳細は「媒体コード（baitai_code）について」参照\n* 指定しなかった場合、いい物件Oneで画像の出稿先媒体を「すべて」にしている画像メタデータのみ取得する\n* 特にパノラマ画像はデフォルトでの出稿先媒体が「すべて」ではないので注意\n* いい物件Oneで出稿先媒体を限定している場合、このパラメータで媒体を指定する必要がある\n* 存在しないコードが指定されてもエラーにはせず、指定されなかったときと同じ挙動になる\n",
+            "in": "query",
+            "name": "baitai_code",
+            "required": false,
+            "schema": {
+              "description": "媒体コード\n\nいい物件One上の出稿設定でフィルターする\n\n* 専用の媒体コードを指定する。コードの詳細は「媒体コード（baitai_code）について」参照\n* 指定しなかった場合、いい物件Oneで画像の出稿先媒体を「すべて」にしている画像メタデータのみ取得する\n* 特にパノラマ画像はデフォルトでの出稿先媒体が「すべて」ではないので注意\n* いい物件Oneで出稿先媒体を限定している場合、このパラメータで媒体を指定する必要がある\n* 存在しないコードが指定されてもエラーにはせず、指定されなかったときと同じ挙動になる\n",
+              "example": "101",
+              "title": "Baitai Code",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "画像種別コード\n\n画像種別でフィルターする\n\n* kind_code をカンマ区切りで１つ以上指定することができる\n* 指定された場合、指定された画像種別のみを取得する\n* 指定されなかった場合、すべての画像を取得する\n* 存在しないコードが指定されてもエラーにならない\n",
+            "in": "query",
+            "name": "kind_code",
+            "required": false,
+            "schema": {
+              "description": "画像種別コード\n\n画像種別でフィルターする\n\n* kind_code をカンマ区切りで１つ以上指定することができる\n* 指定された場合、指定された画像種別のみを取得する\n* 指定されなかった場合、すべての画像を取得する\n* 存在しないコードが指定されてもエラーにならない\n",
+              "example": "1,2,3",
+              "title": "Kind Code",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MetadataResponse"
+                  },
+                  "title": "Response Bulk Get Metadata Sale Sale List  Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "property_keyが50個を超えている場合等"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Bulk Get Metadata Sale",
+        "tags": [
+          "ImageQueryAPI"
+        ]
+      }
+    },
+    "/sale/{property_key}/": {
+      "get": {
+        "description": "売買物件の画像メタデータを取得する",
+        "operationId": "get_metadata_sale_sale__property_key___get",
+        "parameters": [
+          {
+            "description": "いい生活番号",
+            "in": "path",
+            "name": "property_key",
+            "required": true,
+            "schema": {
+              "description": "いい生活番号",
+              "example": "1113026781900000000002",
+              "title": "Property Key",
+              "type": "string"
+            }
+          },
+          {
+            "description": "媒体コード\n\nいい物件One上の出稿設定でフィルターする\n\n* 専用の媒体コードを指定する。コードの詳細は「媒体コード（baitai_code）について」参照\n* 指定しなかった場合、いい物件Oneで画像の出稿先媒体を「すべて」にしている画像メタデータのみ取得する\n* 特にパノラマ画像はデフォルトでの出稿先媒体が「すべて」ではないので注意\n* いい物件Oneで出稿先媒体を限定している場合、このパラメータで媒体を指定する必要がある\n* 存在しないコードが指定されてもエラーにはせず、指定されなかったときと同じ挙動になる\n",
+            "in": "query",
+            "name": "baitai_code",
+            "required": false,
+            "schema": {
+              "description": "媒体コード\n\nいい物件One上の出稿設定でフィルターする\n\n* 専用の媒体コードを指定する。コードの詳細は「媒体コード（baitai_code）について」参照\n* 指定しなかった場合、いい物件Oneで画像の出稿先媒体を「すべて」にしている画像メタデータのみ取得する\n* 特にパノラマ画像はデフォルトでの出稿先媒体が「すべて」ではないので注意\n* いい物件Oneで出稿先媒体を限定している場合、このパラメータで媒体を指定する必要がある\n* 存在しないコードが指定されてもエラーにはせず、指定されなかったときと同じ挙動になる\n",
+              "example": "101",
+              "title": "Baitai Code",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "画像種別コード\n\n画像種別でフィルターする\n\n* kind_code をカンマ区切りで１つ以上指定することができる\n* 指定された場合、指定された画像種別のみを取得する\n* 指定されなかった場合、すべての画像を取得する\n* 存在しないコードが指定されてもエラーにならない\n",
+            "in": "query",
+            "name": "kind_code",
+            "required": false,
+            "schema": {
+              "description": "画像種別コード\n\n画像種別でフィルターする\n\n* kind_code をカンマ区切りで１つ以上指定することができる\n* 指定された場合、指定された画像種別のみを取得する\n* 指定されなかった場合、すべての画像を取得する\n* 存在しないコードが指定されてもエラーにならない\n",
+              "example": "1,2,3",
+              "title": "Kind Code",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MetadataResponse"
+                  },
+                  "title": "Response Get Metadata Sale Sale  Property Key   Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Metadata Sale",
+        "tags": [
+          "ImageQueryAPI"
+        ]
+      }
+    }
+  }
+}
