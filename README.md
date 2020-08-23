@@ -1,4 +1,5 @@
 # intern-2020-boilerplate
+株式会社いい生活 開発リポジトリ
 
 ## Project setup
 ```
