@@ -1,4 +1,4 @@
-# intern-2020-boilerplate
+# intern-2020-boilerplate elife
 株式会社いい生活 開発リポジトリ
 
 ## Project setup
